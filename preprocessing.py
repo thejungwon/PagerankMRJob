@@ -1,5 +1,5 @@
 from mrjob.job import MRJob
-from bs4 import BeautifulSoup
+
 import os
 import re
 import json
@@ -18,16 +18,14 @@ class MRLinkExtractor(MRJob):
 
 
         if '</html>' in line and self.in_links:
-            yield self.from_page+"/"+str(len(self.outgoing_pages)), '/t'.join(self.outgoing_pages)
+            yield self.from_page+"/"+str(len(self.outgoing_pages)), ' '.join(self.outgoing_pages)
             self.from_page = ""
             self.in_links = False
             self.outgoing_pages = []
 
         if 'href=' in line and '.html' in line and self.in_links:
-            soup = BeautifulSoup(line,"html.parser")
-            for a in soup.find_all('a', href=True):
-                link =  a['href'].split("/")[-1]
-                self.outgoing_pages.append(link)
+            link =  line[line.find("href=")+6:line.find(".html")+5].split("/")[-1]
+            self.outgoing_pages.append(link)
 
 
 if __name__ == '__main__':
