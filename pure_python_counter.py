@@ -8,7 +8,7 @@ for member in tar.getmembers():
     f=tar.extractfile(member)
     content=f.read()
 
-    if '.html' in member.name and 'av/articles/' in member.name :
+    if '.html' in member.name and '/articles/' in member.name :
 
         page_cnt+=1
         print (member.name)
