@@ -59,7 +59,6 @@ class MRLinkExtractor(MRJob):
         if link_condition(line):
             link =  line[line.find("href=")+6:line.find(".html")+5].split("/")[-1]
             if link.count(".")==1:
-                print(link)
                 self.outgoing_pages.append(link)
 
 
@@ -69,24 +68,6 @@ class MRLinkExtractor(MRJob):
             page_name = four_digit_escape(page.split(".")[0])
             # print(self.outgoing_pages)
             yield page_name+".htmm/"+str(len(self.outgoing_pages)), ' '.join(self.outgoing_pages)
-
-    def reducer_init(self):
-        self.incomplete_pages={}
-
-    def reducer(self, key, values):
-        if ".htmk" in key or ".htmm" in key :
-            self.incomplete_pages[key]=' '.join(values)
-        else :
-            #yield key, ' '.join(values)
-            yield key, 1
-    def reducer_final(self):
-
-
-        for pagename, pages in self.incomplete_pages.items():
-            # print pagename
-            yield pagename, 1
-
-
 
 
 def four_digit_escape(string):
