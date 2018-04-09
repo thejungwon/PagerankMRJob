@@ -123,14 +123,19 @@ class MRLinkExtractor(MRJob):
 linkExcludingArray = ['=======']
 linkExcludingArray2=['=======']
 def replace_useless_word(string):
-    useless = ['Image~', 'Template~', 'Template%7', 'User_talk', 'User~','Wikipedia~','Wikipedia%7','Wikipedia_talk~','Category~','Talk~','Talk%7','Template_talk%7']
+    # useless = ['Image~', 'Template~', 'Template%7', 'User_talk', 'User~','Wikipedia~','Wikipedia%7','Wikipedia_talk~','Category~','Talk~','Talk%7','Template_talk%7']
     string = string.replace("_"," ")
-    for word in useless:
-        string=string.replace(word,"")
+    string = string.split("~")[-1]
+    string = string.split("%7")[-1]
+    # for word in useless:
+    #     string=string.replace(word,"")
     return string
 
 def four_digit_escape(string):
-    return ''.join(u'u%04x'%ord(char) for char in string)
+    string = ''.join(u'u%04x'%ord(char) for char in string)
+    string = string.replace("u","\u")
+    return string
+    # return string
 
 def starting_condition(line):
     if '.html' in line and '<!DOCTYPE html' in line \
