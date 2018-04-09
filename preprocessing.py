@@ -16,7 +16,7 @@ class MRLinkExtractor(MRJob):
        self.incomplete_pages=[]
        self.incomplete_from_page = ""
        self.incomplete_sent = False
-       self.yield_cnt = 100000
+
 
 
     def mapper(self, _, line):
@@ -27,39 +27,29 @@ class MRLinkExtractor(MRJob):
         if not self.first_line_found:
             self.first_line = line
             self.first_line_found = True
-            # print("FIRST LINE")
-            # print(line)
-            # print(1)
-
 
         #for the beginning of the file
         if starting_condition(line) and not self.in_links:
-            # print(2)
-            print(line)
-            # if '10_juli.html'in line:
-            #     print(line)
+
             self.in_links = True
-            # self.from_page = line[line.find("articles"):line.find(".html")+5].split("/")[-1]
-            self.from_page = line[line.find("articles"):line.find(".html")+5]
+            self.from_page = line[line.find("articles"):line.find(".html")+5].split("/")[-1]
+            # self.from_page = line[line.find("articles"):line.find(".html")+5]
             self.outgoing_pages = []
 
-            if len(self.incomplete_pages) >0 and not starting_condition(self.first_line) and not self.incomplete_sent:
+            if not starting_condition(self.first_line) and not self.incomplete_sent:
                 self.incomplete_sent = True
                 page_name = self.from_page
-                page_name = '/'.join(page_name.split("/")[:-1])+"/"+str(self.yield_cnt)+"_"+page_name.split("/")[-1]
-                page_name = four_digit_escape(page_name.split(".")[0])
-                # str(self.yield_cnt)+"_"+page_name.split("/")[-1]
 
-                # print "INCOMPLTE LINE"
-                # print line
-                # print self.from_page
-                # print self.incomplete_pages
-                # print "FIRST %s" %(self.first_line)
-                # print(line)
-                # yield page_name+".htmk/"+str(len(self.incomplete_pages)), ' '.join(self.incomplete_pages)
+                page_name=replace_useless_word(page_name)
+                page_name = four_digit_escape(page_name.split(".")[0])
+
+
+
                 if self.from_page :
-                    self.yield_cnt+=1
-                    yield page_name+".htmk/"+str(len(self.incomplete_pages)), 1
+                    self.incomplete_pages = set(self.incomplete_pages)
+                    self.incomplete_pages = list(self.incomplete_pages)
+                    yield page_name+".htmk/"+str(len(self.incomplete_pages)), ' '.join(self.incomplete_pages)
+                    # yield page_name+".htmk/"+str(len(self.incomplete_pages)), 1
                 self.incomplete_pages = []
 
 
@@ -68,13 +58,17 @@ class MRLinkExtractor(MRJob):
             # print(3)
 
             if self.in_links:
-                page_name = self.from_page
-                page_name = '/'.join(page_name.split("/")[:-1])+"/"+str(self.yield_cnt)+"_"+page_name.split("/")[-1]
-                page_name = four_digit_escape(page_name.split(".")[0])
 
-                # yield page_name+".html/"+str(len(self.outgoing_pages)), ' '.join(self.outgoing_pages)
-                self.yield_cnt+=1
-                yield page_name+".html/"+str(len(self.outgoing_pages)), 1
+                page_name = self.from_page
+                # page_name = '/'.join(page_name.split("/")[:-1])+"/"+str(self.yield_cnt)+"_"+page_name.split("/")[-1]
+
+                page_name=replace_useless_word(page_name)
+                page_name = four_digit_escape(page_name.split(".")[0])
+                self.outgoing_pages = set(self.outgoing_pages)
+                self.outgoing_pages = list(self.outgoing_pages)
+                yield page_name+".html/"+str(len(self.outgoing_pages)), ' '.join(self.outgoing_pages)
+
+                # yield page_name+".html/"+str(len(self.outgoing_pages)), 1
             else:
                 self.incomplete_pages=self.outgoing_pages
 
@@ -84,21 +78,10 @@ class MRLinkExtractor(MRJob):
 
             #for the case that '</html> with new line
             if starting_condition(line):
-                # print(4)
-                self.in_links = True
-                # self.from_page = line[line.find("articles"):line.find(".html")+5].split("/")[-1]
-                self.from_page = line[line.find("articles"):line.find(".html")+5]
-                if len(self.incomplete_pages) >0 and not starting_condition(self.first_line) and not self.incomplete_sent:
-                    self.incomplete_sent = True
-                    page_name = self.from_page
-                    page_name = '/'.join(page_name.split("/")[:-1])+"/"+str(self.yield_cnt)+"_"+page_name.split("/")[-1]
-                    page_name = four_digit_escape(page_name.split(".")[0])
 
-                    # print("SECOND")
-                    # yield page_name+".htmk/"+str(len(self.incomplete_pages)), ' '.join(self.incomplete_pages)
-                    self.yield_cnt+=1
-                    yield page_name+".htmk/"+str(len(self.incomplete_pages)), 1
-                    self.incomplete_pages = []
+                self.in_links = True
+                self.from_page = line[line.find("articles"):line.find(".html")+5].split("/")[-1]
+                # self.from_page = line[line.find("articles"):line.find(".html")+5]
 
 
 
@@ -106,45 +89,49 @@ class MRLinkExtractor(MRJob):
         #for the link of the file
         if link_condition(line) :
             link =  line[line.find("href=")+6:line.find(".html")+5].split("/")[-1]
-            if link.count(".")==1 and link_condition2(link):
+            if link_condition2(link):
+                link= replace_useless_word(link)
+                link = four_digit_escape(link.split(".")[0])+".html"
                 self.outgoing_pages.append(link)
 
 
     def mapper_final(self):
 
-        # print(5)
-        # print(self.in_links)
 
-        # print(self.final_line)
-        # print "FINAL LINE %s" %( self.in_links)
-        # print(self.from_page)
-        # print(self.first_line)
-        # print(self.final_line)
         if self.in_links:
 
-            # print "HALF START"
 
             page_name = self.from_page
-            page_name = '/'.join(page_name.split("/")[:-1])+"/"+str(self.yield_cnt)+"_"+page_name.split("/")[-1]
+            # page_name = '/'.join(page_name.split("/")[:-1])+"/"+str(self.yield_cnt)+"_"+page_name.split("/")[-1]
+            page_name=replace_useless_word(page_name)
             page_name = four_digit_escape(page_name.split(".")[0])
-            # print(self.outgoing_pages)
-            # yield page_name+".htmm/"+str(len(self.outgoing_pages)), ' '.join(self.outgoing_pages)
 
-            self.yield_cnt+=1
-            yield page_name+".htmm/"+str(len(self.outgoing_pages)), 1
-        # sys.exit()
-
+            self.outgoing_pages = set(self.outgoing_pages)
+            self.outgoing_pages = list(self.outgoing_pages)
+            yield page_name+".htmm/"+str(len(self.outgoing_pages)), ' '.join(self.outgoing_pages)
+            # yield page_name+".htmm/"+str(len(self.outgoing_pages)), 1
 
 
-linkExcludingArray = ['Image~', 'Template~', 'Template%7', 'User_talk', 'User~',
-'Wikipedia~','Wikipedia%7','Wikipedia_talk~','Category~','Talk~','Talk%7','Template_talk%7']
-linkExcludingArray2 = ["%7E", "~", "href=http"]
-# linkExcludingArray = []
-# linkExcludingArray2=[]
+
+    # def reducer(self, key,values):
+    #     yield key, 1
+
+
+# linkExcludingArray = ['Image~', 'Template~', 'Template%7', 'User_talk', 'User~',
+# 'Wikipedia~','Wikipedia%7','Wikipedia_talk~','Category~','Talk~','Talk%7','Template_talk%7']
+# linkExcludingArray2 = ["%7E", "~", "href=http"]
+linkExcludingArray = ['=======']
+linkExcludingArray2=['=======']
+def replace_useless_word(string):
+    useless = ['Image~', 'Template~', 'Template%7', 'User_talk', 'User~','Wikipedia~','Wikipedia%7','Wikipedia_talk~','Category~','Talk~','Talk%7','Template_talk%7']
+    string = string.replace("_"," ")
+    for word in useless:
+        string=string.replace(word,"")
+    return string
 
 def four_digit_escape(string):
-    return string
-    #return ''.join(u'u%04x'%ord(char) for char in string)
+    return ''.join(u'u%04x'%ord(char) for char in string)
+
 def starting_condition(line):
     if '.html' in line and '<!DOCTYPE html' in line \
     and not any(re.findall('|'.join(linkExcludingArray), line)):
