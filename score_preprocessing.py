@@ -1,0 +1,41 @@
+from mrjob.job import MRJob
+from mrjob.protocol import JSONProtocol
+
+class MRScorePreprocessing(MRJob):
+    OUTPUT_PROTOCOL = JSONProtocol
+    def configure_args(self):
+        super(MRScorePreprocessing, self).configure_args()
+
+        self.add_passthru_arg('--num-of-page', dest="totalnumber", type=int, default=10000, help='please type the number of page')
+
+
+    def mapper(self, _, line):
+
+        page,links = line.split('\t')
+        if ".html" in page:
+            page = page.split("/")[0]
+            page = page.replace("\\","")
+            page = page.replace('\"',"")
+
+            link_dict={}
+            links = links.split(" ")
+            node = {}
+
+            links = set(links)
+            links = list(links)
+            for link in links:
+                link = link.replace('"','')
+                link = link.replace("\\","")
+                link_dict[link]=1.0/len(links)
+
+            if links:
+                node['links'] = link_dict.items()
+
+            node['rank'] = 1.0/self.options.totalnumber
+
+            yield page, node
+
+
+
+if __name__ == '__main__':
+    MRScorePreprocessing.run()

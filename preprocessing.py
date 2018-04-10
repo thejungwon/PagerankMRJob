@@ -126,7 +126,7 @@ def replace_useless_word(string):
     # useless = ['Image~', 'Template~', 'Template%7', 'User_talk', 'User~','Wikipedia~','Wikipedia%7','Wikipedia_talk~','Category~','Talk~','Talk%7','Template_talk%7']
     string = string.replace("_"," ")
     string = string.split("~")[-1]
-    string = string.split("%7")[-1]
+    string = string.split("%7E")[-1]
     # for word in useless:
     #     string=string.replace(word,"")
     return string
