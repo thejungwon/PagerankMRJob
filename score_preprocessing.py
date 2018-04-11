@@ -21,20 +21,22 @@ class MRScorePreprocessing(MRJob):
             links = links.split(" ")
             node = {}
 
-            links = set(links)
-            links = list(links)
+
+            set_links = set(links)
+            links = list(set_links)
+            clean_links = []
             for link in links:
                 link = link.replace('"','')
                 link = link.replace("\\","")
-                link_dict[link]=1.0/len(links)
+                clean_links.append(link)
 
             if links:
-                node['links'] = link_dict.items()
+                node['links'] = clean_links
+                node['length'] = len(links)
 
             node['rank'] = 1.0/self.options.totalnumber
 
             yield page, node
-
 
 
 if __name__ == '__main__':
