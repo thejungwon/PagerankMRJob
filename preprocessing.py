@@ -133,7 +133,7 @@ def replace_useless_word(string):
 
 def four_digit_escape(string):
     string = ''.join(u'u%04x'%ord(char) for char in string)
-    string = string.replace("u","\u")
+    # string = string.replace("u","\u")
     return string
     # return string
 

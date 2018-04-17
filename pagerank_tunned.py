@@ -14,12 +14,38 @@ class MRPageRank(MRJob):
         self.add_passthru_arg('--num-of-page', dest="totalnumber", type=int, default=10000, help='please type the number of page')
 
     def mapper(self, page_name, page):
+
         if 'links' in page:
             yield page_name, ('page', page)
             L = page.get("length")
             for to_page in page.get('links'):
                 if L :
                     yield to_page, ('rank', page['rank'] / L)
+
+    def combiner(self, page_name, values):
+        page = {}
+        partial_score = 0.0
+        pageExist = False
+        linkExist = False
+        link_list = ()
+        for which_type, value in values:
+            # print("In for")
+            if which_type == 'page':
+                page = value
+                pageExist = True
+                # yield page_name, ('page', page)
+            elif which_type == 'rank':
+                partial_score += value
+                linkExist= True
+                # link_list+=('rank', value)
+                # yield page_name, ('rank', value)
+
+        if pageExist :
+            yield page_name, ('page', page)
+        if linkExist :
+            yield page_name, ('rank', partial_score)
+
+
 
     def reducer(self, page_name, values):
 
@@ -45,7 +71,7 @@ class MRPageRank(MRJob):
 
 
     def steps(self):
-        return ([MRStep(mapper=self.mapper, reducer=self.reducer)] * 3)
+        return ([MRStep(mapper=self.mapper,combiner=self.combiner, reducer=self.reducer)] * 3)
 
 
 if __name__ == '__main__':
