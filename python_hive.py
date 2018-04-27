@@ -1,9 +1,9 @@
 from pyhive import hive
 cursor = hive.connect('localhost').cursor()
 cursor.execute("SELECT * FROM `wiki` WHERE `id` LIKE '%.htmm%' OR `id` LIKE '%.htmk%'  ORDER BY `id` ASC")
-strs = cursor.fetchall()
+rows = cursor.fetchall()
 
-for i in range(0,len(strs),2):
+for i in range(0,len(rows),2):
     pair_found = False
     newname=""
     newlinks=""
