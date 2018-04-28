@@ -7,19 +7,19 @@ for i in range(0,len(rows),2):
     pair_found = False
     newname=""
     newlinks=""
-    if '.htmm' in strs[i][0]:
-        if '.htmk' in strs[i+1][0]:
+    if '.htmm' in rows[i][0]:
+        if '.htmk' in rows[i+1][0]:
             newname = newrow[0].replace("htmm","html").encode('utf-8')
-            originCnt = int(newname.split("/")[-1].replace('"',''))
-            newCnt = originCnt + int(strs[i+1][0].split("/")[-1].replace('"',''))
-            newname = newname.replace("/" + str(originCnt), "/" + str(newCnt))
-            newlinks = '"'+str(strs[i][1].encode('utf-8').replace('"','')+" "+strs[i+1][1].encode('utf-8').replace('"','')).strip()+'"'
-    elif '.htmk' in strs[i][0]:
-        if '.htmm' in strs[i+1][0]:
-            newname = strs[i+1][0].replace("htmm", "html").encode('utf-8')
-            originCnt=int(newname.split("/")[-1].replace('"',''))
-            newCnt=originCnt+int(strs[i][0].split("/")[-1].replace('"',''))
-            newname=newname.replace("/"+str(originCnt),"/"+str(newCnt))
-            newlinks= '"'+str(strs[i+1][1].encode('utf-8').replace('"','')+" "+strs[i][1].encode('utf-8').replace('"','')).strip()+'"'
+            # originCnt = int(newname.split("/")[-1].replace('"',''))
+            # newCnt = originCnt + int(rows[i+1][0].split("/")[-1].replace('"',''))
+            # newname = newname.replace("/" + str(originCnt), "/" + str(newCnt))
+            newlinks = '"'+str(rows[i][1].encode('utf-8').replace('"','')+" "+rows[i+1][1].encode('utf-8').replace('"','')).strip()+'"'
+    elif '.htmk' in rows[i][0]:
+        if '.htmm' in rows[i+1][0]:
+            newname = rows[i+1][0].replace("htmm", "html").encode('utf-8')
+            # originCnt=int(newname.split("/")[-1].replace('"',''))
+            # newCnt=originCnt+int(rows[i][0].split("/")[-1].replace('"',''))
+            # newname=newname.replace("/"+str(originCnt),"/"+str(newCnt))
+            newlinks= '"'+str(rows[i+1][1].encode('utf-8').replace('"','')+" "+rows[i][1].encode('utf-8').replace('"','')).strip()+'"'
     newrow = newname+"\t"+newlinks
     print(newrow)

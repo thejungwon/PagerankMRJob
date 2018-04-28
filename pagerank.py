@@ -24,11 +24,18 @@ class MRPageRank(MRJob):
             elif which_type == 'rank':
                 total_score += value
         d = 0.85
-        page['rank'] = 1 - d + d * total_score
-        yield page_name, page
-
+        if page :
+            page['rank'] = 1 - d + d * total_score
+            yield page_name, page
+        else :
+            print(page_name)
+    def summary_mapper(self, page_name, page):
+        yield '', page.get('rank')
+    def summary_reducer(self, page_name, values):
+        yield '', sum(values)
     def steps(self):
-        return ([MRStep(mapper=self.mapper, reducer=self.reducer)] * 4)
+        # return ([MRStep(mapper=self.mapper, reducer=self.reducer)] * 10+[MRStep(mapper=self.summary_mapper,reducer=self.summary_reducer)])
+        return ([MRStep(mapper=self.mapper, reducer=self.reducer)] * 16)
 
 
 if __name__ == '__main__':
