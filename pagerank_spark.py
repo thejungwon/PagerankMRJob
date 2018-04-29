@@ -1,22 +1,17 @@
 import sys
 from operator import add
-
 from pyspark import SparkContext
+
 def compute_weight(page,urls, rank):
     yield (page, 0)
     for url in urls: yield (url, rank / len(urls))
-
 def parse_link(links):
-    links=links.replace('"','')
-    links=links.split("\t")
+    links=links.replace('"','').split("\t")
     page=links[0].split("/")[0]
     outgoings = links[1].split()
-
     return page,outgoings
 
 if __name__ == "__main__":
-
-
     sc = SparkContext()
     sc.setLogLevel("ERROR")
     # file = "cleaner_result.txt"
@@ -44,6 +39,6 @@ if __name__ == "__main__":
         pagename = pagename.split(".")[0]
         pagename = pagename.decode('unicode_escape')
         print("%s.html has rank: %s." % (pagename , rank))
-    print("Total Rank shoul be the same= %s" % (totalRank))
-    print("total number of interation %s" % (number_of_iter))
+    print("Total Rank should be the same= %s" % (totalRank))
+    print("Total number of interation %s" % (number_of_iter))
     sc.stop()
